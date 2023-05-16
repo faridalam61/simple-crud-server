@@ -9,7 +9,6 @@ require('dotenv').config()
 app.use(cors());
 app.use(express.json())
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.se8uzie.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -45,6 +44,25 @@ async function run() {
           const query = { _id: new ObjectId(id) }
           const result = await userList.findOne(query)
           res.send(result)
+      })
+
+      // Update user
+      app.put('/users/:id',async(req,res)=>{
+        const id = req.params.id;
+        const options = { upsert: true };
+        const filter = {_id: new ObjectId(id)}
+        const newData = req.body;
+        const updatedUser = {
+          $set:{
+            name:newData.name, 
+            email:newData.email
+          }
+        }
+
+        
+        const result = await userList.updateOne(filter,updatedUser,options)
+        res.send(result);
+
       })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
